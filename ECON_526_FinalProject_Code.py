@@ -13,6 +13,7 @@ Key changes after comments from Paul:
 3. The significant outcomes are unchanged.
 
 Still needs to be done:
+!!!The Plots_Out_TCP isn't good enough!!!
 1. Report the table with Confidence Interval and Standard Error
 2. Choose some other significant / insignificant results that people are interested in
 3. Be honest
@@ -268,7 +269,7 @@ if runRegression:
     
     # sort out dependent variables with significance
     dependent_vars_sig = [
-        "scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"
+        "scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"
     ]
     
     # Find and create directory for plots and save them 
@@ -401,7 +402,7 @@ if runTCP:
         return plt
     
     # sort out dependent variables with significance
-    dependent_vars_sig_TCP = ["scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"]
+    dependent_vars_sig_TCP = ["scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"]
     
     # Find and create directory for plots and save them 
     main_folder = os.getcwd()

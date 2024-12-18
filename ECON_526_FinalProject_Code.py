@@ -32,7 +32,7 @@ from rdrobust import rdrobust, rdbwselect, rdplot
 runDataCleaning = False # change to True to re-generate the labeled dataset
 runDataCleaning_NA = False # Second Stage Cleaning, dropping some columns, and then blank cells
 runRDrobust = False # change to True to run machine learning 
-runRegression = True # change to True to run regression
+runRegression = False # change to True to run regression
 runTCP = True # TCP as a placebo
 
 ### Change 'runDataCleaning' to True to run this part ###
@@ -292,16 +292,33 @@ if runTCP:
 
     # Regression Discontinuity Design
     rdd_data = rdd_data.assign(threshold=(rdd_data["dis_log"] > 0).astype(int))
-    rdd_data_TCP = rdd_data[rdd_data['year'].isin([2018, 2019, 2020])]
-    rdd_data_TCP.to_excel('Dataset_labeled_TCP.xlsx', index=False, sheet_name='Dataset') 
-    dependent_vars = [
-        "scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"
+    rdd_data_TCP = rdd_data[rdd_data['year'].isin([2018, 2020])]
+    columns_to_keep = [
+    "year",	"prov_code","city_code","gdp", "gdppc", "scnd_gdp", "fdi", "cnsmptn_tnpc", "incm_tnpc", "female_hj_aft12", "male_hj_aft12",
+    "emply_org", "emply_tnprvt", "unemply_tn", "cpi_lstyr", "cpi_04", "dvrcecs_setl_prov", "dvrcejdge_no_prov",
+    "dvrcert_rgh", "rstorrt_rgh", "mrgert_rgh", "dvrcert_rgh_robs", "rstorrt_rgh_robs", "ln_rlgdppc", "open",
+    "ln_avghsprice", "ln_cnsmptn", "sex_rto_hjcz", "hsprice_pegrth", "hs_land", "mrge_cpl", "ln_birth", "frtlty_rt",
+    "ln_emply", "emply_rt", "hsprice_yrgrth", "dvrcecs_setl_prov_pc", "dis_log", "threshold"
     ]
+    # Filter the DataFrame to include only the desired columns
+    rdd_data_TCP = rdd_data_TCP[[col for col in columns_to_keep if col in rdd_data_TCP.columns]]
+
+    rdd_data_TCP.to_excel('Dataset_labeled_TCP.xlsx', index=False, sheet_name='Dataset') 
+    # These are sig in OCP
+    # "scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"
+
 
     # Dictionary to store models
     models = {}
 
     # Fit the models
+    dependent_vars = [
+        "gdp", "gdppc", "scnd_gdp", "fdi", "cnsmptn_tnpc","incm_tnpc","female_hj_aft12","male_hj_aft12",
+        "emply_org","emply_tnprvt","unemply_tn","cpi_lstyr","cpi_04","dvrcecs_setl_prov","dvrcejdge_no_prov",
+        "dvrcert_rgh","rstorrt_rgh","mrgert_rgh","dvrcert_rgh_robs","rstorrt_rgh_robs","ln_rlgdppc","open",
+        "ln_avghsprice","ln_cnsmptn","sex_rto_hjcz","hsprice_pegrth","hs_land", "mrge_cpl","ln_birth","frtlty_rt",
+        "ln_emply","emply_rt","hsprice_yrgrth","dvrcecs_setl_prov_pc"
+    ]
     for i, var in enumerate(dependent_vars, start=1):
         formula = f"{var} ~ dis_log * threshold + year + prov_code" #geo & prov control, yr FE added
         models[f"model{i}"] = smf.wls(formula, rdd_data_TCP).fit()
@@ -398,11 +415,11 @@ if runTCP:
         plt.ylabel(outcome_var)
         plt.legend()
         #print(left_fit(left_x)) #This code can check whether the fit line has issues, if nan, issue is there
-        
         return plt
     
     # sort out dependent variables with significance
-    dependent_vars_sig_TCP = ["scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov","dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"]
+    dependent_vars_sig_TCP = ["scnd_gdp", "incm_tnpc", "cpi_04","dvrcecs_setl_prov",
+                              "dvrcecs_setl_prov_pc","open", "ln_avghsprice", "hsprice_pegrth"]
     
     # Find and create directory for plots and save them 
     main_folder = os.getcwd()
